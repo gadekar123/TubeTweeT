@@ -12,9 +12,11 @@ const uploadOnCloudinary = async (file) => {
         if(!file) return null;
         const res = await cloudinary.uploader.upload(file, {resource_type: "auto"})
         console.log("file uploaded successfully on cloudinary",res.url);
+        fs.unlinkSync(file, (err) => console.error("Error deleting local file:", err))
         return res;
     } catch (error) {
-        fs.unlinkSync(file); // remove the locally saved temp files as the upload operation failed
+            fs.unlinkSync(file, (err) => console.error("Error deleting local file:", err))
+     
         return null;
     }
 };
