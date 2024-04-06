@@ -5,21 +5,22 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 
-const genearateAccessTokenAndRefreshToken = async (userId) => {
+const generateAccessAndRefereshTokens = async(userId) =>{
     try {
-        const user = await User.findById(userId);
+        const user = await User.findById(userId)
         const accessToken = user.generateAccessToken()
         const refreshToken = user.generateRefreshToken()
-        user.refreshToken = refreshToken;
 
+        user.refreshToken = refreshToken
         await user.save({ validateBeforeSave: false })
 
-        return { accessToken, refreshToken }
+        return {accessToken, refreshToken}
+
+
     } catch (error) {
-        throw new ApiError(500, "Something went wrong, please try again to generate refresh token and access token")
+        throw new ApiError(500, "Something went wrong while generating referesh and access token")
     }
 }
-
 
 const registerUser = asyncHandler(async (req, res, next) => {
     //get user details from the frontend
@@ -98,7 +99,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
         throw new ApiError(401, "Invalid password")
     }
     //now make access and refresh token , many times will be used so will out in one method
-    const { accessToken, refreshToken } = await genearateAccessTokenAndRefreshToken(findUser._id);
+    const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(findUser._id);
 
     //send in cookies
 
@@ -124,6 +125,7 @@ const logoutUser = asyncHandler(async (req, res, next) => {
     }
 
     await User.findByIdAndUpdate(
+        userId,
         {
             $set: { refreshToken: undefined }
         },
