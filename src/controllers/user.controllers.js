@@ -259,7 +259,7 @@ const updateUserCoverImage = asyncHandler(async (req, res, next) => {
     const coverImageLocalPath = req.file?.path;
 
     if (!coverImageLocalPath) {
-        throw new ApiError(400, "cpver image is required")
+        throw new ApiError(400, "cover image is required")
     }
 
    const coverImage= await uploadOnCloudinary(coverImageLocalPath)
