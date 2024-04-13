@@ -344,5 +344,51 @@ const getUserChannelProfile = asyncHandler(async (req, res, next) => {
     return res.status(200).json(new ApiResponse(200, channel[0], "Channel fetched successfully")) // return the first object in the array
 });
 
+const getWatchHistory = asyncHandler(async (req, res, next) => {
+    const user = await User.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup: {
+                from: "Videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "Users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullname: 1,
+                                        username: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                $first: "$owner"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
 
-export { registerUser, loginUser, logoutUser, refereshAccessToken, changeCurrentPassword, getUserChannelProfile, getCurrentUser, updateAccountDetails, updateUserCoverImage, updateUserAvatar }
+    ])
+
+    return res.status(200).json(new ApiResponse(200, user[0]?.watchHistory, "Watch history fetched successfully"))
+});
+
+export { registerUser, loginUser, logoutUser, refereshAccessToken, changeCurrentPassword,getWatchHistory, getUserChannelProfile, getCurrentUser, updateAccountDetails, updateUserCoverImage, updateUserAvatar }
